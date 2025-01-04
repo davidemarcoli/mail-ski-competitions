@@ -11,7 +11,7 @@ export const formatCompetition = (competitionData: any) => {
     output.push(`Discipline: ${competition.discipline.join(', ')}\n`);
 
     // Races Section
-    races.forEach((race: any) => {
+    races.filter((race: any) => !race.is_training).forEach((race: any) => {
         output.push(`🏁 RACE DETAILS (${race.gender})`);
         output.push('────────────────────────');
         output.push(`Date: ${new Date(race.date).toLocaleString()}`);
