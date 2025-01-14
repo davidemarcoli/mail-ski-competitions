@@ -21,8 +21,28 @@ export const fetchRelevantCompetitions = async () => {
         return JSON.parse(await response.text());
     }));
 
-    const upcomingEventsWithFilteredRaces = eventDetails.map((event: any) => {
-        console.log(event)
+    // Filter events with non-training races happening in the next two days
+    const upcomingEventsWithNonTrainingRaces = eventDetails.filter((event: any) => {
+        // Get the detailed event info including races
+        if (!event || !event.races) return false;
+
+        // Check if there are any non-training races in the next two days
+        return event.races.some((race: any) => {
+            // Skip if it's a training race
+            if (race.is_training) return false;
+
+            // Convert race date to Date object
+            const raceDate = new Date(race.date);
+            
+            // Set race date to start of day for consistent comparison
+            raceDate.setHours(0, 0, 0, 0);
+            
+            // Check if race is within the date range
+            return raceDate >= currentDate && raceDate <= twoDaysFromNow;
+        });
+    });
+
+    const upcomingEventsWithFilteredRaces = upcomingEventsWithNonTrainingRaces.map((event: any) => {
         event.races = event.races.filter((race: any) => {
             const raceDate = new Date(race.date);
             return raceDate >= currentDate;
@@ -38,8 +58,8 @@ const parseEventDate = (dateStr: any) => {
         // Handle single date case
         const [day, month, year] = dateStr.split(' ');
         return {
-            start: `${day} ${month} ${year}`,
-            end: `${day} ${month} ${year}`
+            start: new Date(`${day} ${month} ${year}`),
+            end: new Date(`${day} ${month} ${year}`)
         };
     }
     
